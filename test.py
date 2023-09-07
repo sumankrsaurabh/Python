@@ -86,4 +86,4 @@ async def search_spotify_and_get_youtube_links():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
