@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Playlist to YouTube</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
+
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: "Inter", sans-serif;
+            text-align: center;
+            /* Center align text within all elements */
+        }
+
+
+
+        .box {
+            width: 80vw;
+            margin: auto auto;
+            display: flex;
+            flex-direction: column;
+            /* Stack items vertically */
+            align-items: center;
+        }
+
+        h1 {
+            color: black;
+            font-weight: 400;
+            font-size: 20px;
+            margin-top: 100px;
+        }
+
+        form {
+            width: 100%;
+        }
+
+        form input {
+            width: 80%;
+            padding: 12px;
+            border-radius: 30px;
+            margin-top: 50px;
+            text-align: left;
+            border: 1px solid springgreen;
+        }
+
+        form button {
+            padding: 12px 40px;
+            border-radius: 30px;
+            border: none;
+            color: aliceblue;
+            background-color: rgb(0, 124, 10);
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        .results {
+            width: 60vw;
+            margin: 50px auto;
+            display: block;
+            /* flex-direction: column; */
+            /* Stack items horizontally */
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px;
+        }
+
+        .results div {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .results p {
+            background-color: springgreen;
+            border-radius: 30px;
+            color: whitesmoke;
+            padding: 8px 24px;
+            margin: 2px;
+        }
+
+        .results p a {
+            text-decoration: none;
+            color: whitesmoke;
+        }
+
+        .results h2 {
+            color: black;
+            font-size: 20px;
+            font-weight: normal;
+        }
+
+
+
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            /* Center the spinner */
+            border: 4px solid rgba(0, 0, 0, 0.3);
+            border-top: 4px solid springgreen;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+    </style>
+    <!DOCTYPE html>
+</head>
+
+<body>
+<div class="box">
+    <h1>Spotify Playlist to YouTube Link Converter</h1>
+    <form id="playlist-form">
+        <input type="text" placeholder="Enter or Paste Spotify Playlist URL" id="playlist-url" name="playlist-url"
+               required><br>
+        <button type="button" onclick="searchYouTube()">Get YouTube Video URLs</button>
+    </form>
+</div>
+
+<div class="loading-spinner" id="loading-spinner"></div>
+<div id="results" class="results">
+</div>
+
+<script>
+        async function searchYouTube() {
+            const playlistUrl = document.getElementById("playlist-url").value;
+            const resultsDiv = document.getElementById("results");
+            const loadingSpinner = document.getElementById("loading-spinner");
+
+            // Show the loading spinner while communicating with the server
+            loadingSpinner.style.display = 'block';
+
+            // Make an asynchronous request to the Python server
+            try {
+                const response = await fetch(`/search_spotify_and_get_youtube_links?playlist_url=${encodeURIComponent(playlistUrl)}`);
+                const data = await response.json();
+                resultsDiv.innerHTML = '';
+
+                if (data.error) {
+                    resultsDiv.textContent = `Error: ${data.error}`;
+                } else {
+                    data.songs.forEach(song => {
+                        const songDiv = document.createElement("div");
+                        songDiv.innerHTML = `
+                            <h2>${song.name} - ${song.artist}</h2>
+                            <p><a href="${song.youtube_url}" target="_blank">Watch on YouTube</a></p>
+                        `;
+                        resultsDiv.appendChild(songDiv);
+                    });
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                resultsDiv.textContent = "An error occurred.";
+            }
+            finally {
+                // Hide the loading spinner after the request is completed
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+</script>
+</body>
+
+</html>
